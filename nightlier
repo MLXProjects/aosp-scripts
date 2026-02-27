@@ -1,0 +1,11 @@
+#!/bin/bash
+for f in jb; do
+	echo "Building $f"
+	cd $f
+	make clean
+	source build/envsetup.sh
+	lunch mlx_test-eng
+	make -j2 ramdisk systemimage &> build.log
+	resize2fs -Mf $f/out/target/product/mlx_test/system.img
+	cd ..
+done

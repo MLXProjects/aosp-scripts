@@ -1,0 +1,47 @@
+#!/bin/sh
+OLD_DIR=$PWD
+TARGET=gb
+TARGET_BRANCH=gingerbread
+TARGET_URL=https://android.googlesource.com/platform/manifest.git
+if [ ! -z  "$1" ]; then
+	TARGET=$1
+	if [ ! -z  "$2" ]; then
+		TARGET_BRANCH=$2
+		if [ ! -z  "$3" ]; then
+			TARGET_URL=$3
+		fi
+	else
+		TARGET_BRANCH=$TARGET
+	fi
+fi
+if [ ! -d $TARGET ]; then
+	mkdir $TARGET
+	cd $TARGET
+	echo "Initializing $TARGET_BRANCH on $PWD..."
+	repo init -u $TARGET_URL -b $TARGET_BRANCH --depth=1
+else
+	cd $TARGET
+fi
+echo "Downloading $TARGET_BRANCH on $PWD..."
+if ! repo sync --force-sync --no-clone-bundle --no-tags -j2; then
+	echo "Error syncing AOSP repo. Network having a stroke?"
+	cd "$OLD_DIR"
+	exit
+fi
+if ! grep -q USE_CCACHE ~/.bashrc; then
+	if [ -e "./prebuilt/linux-x86/ccache/ccache" ]; then
+		CCACHE_BIN="./prebuilt/linux-x86/ccache/ccache"
+	elif [ -e "./prebuilts/misc/linux-x86/ccache/ccache" ]; then
+		CCACHE_BIN="./prebuilts/misc/linux-x86/ccache/ccache"
+	fi
+	echo "Setting up ccache..."
+	echo "export USE_CCACHE=1" >> ~/.bashrc
+	$CCACHE_BIN -M 20G
+fi
+echo "Cloning test device tree..."
+cd device
+mkdir mlx
+cd mlx
+git clone https://github.com/MLXProjects/android_device_mlx_test mlx_test -b gb --depth=1
+cd "$OLD_DIR"
+
