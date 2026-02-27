@@ -1,0 +1,13 @@
+if [ -z "$1" ]; then
+	printf "Usage: $0 TARGET\n\tTARGET\tchroot directory\n"
+	exit
+fi
+
+TARGET=$(dirname "$(readlink -f "$0")")/$1
+for f in dev dev/pts proc sys; do
+	mount --bind /$f $TARGET/$f
+done
+chroot $TARGET /bin/login -f root
+for f in dev/pts dev proc sys; do
+	umount $TARGET/$f
+done
