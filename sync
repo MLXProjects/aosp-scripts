@@ -1,0 +1,24 @@
+#!/bin/bash
+if [ ! -d froyo ]; then
+	mkdir froyo
+	cd froyo
+	repo init -u https://android.googlesource.com/platform/manifest.git -b froyo --depth=1
+else
+	cd froyo
+fi
+echo "Downloading AOSP..."
+if ! repo sync --force-sync --no-clone-bundle --no-tags -j2; then
+	echo "Error syncing AOSP repo. Network having a stroke?"
+fi
+if [ -e "./prebuilt/linux-x86/ccache/ccache" ]; then
+	echo "Setting up ccache..."
+	echo "export USE_CCACHE=1" >> ~/.bashrc
+	echo "export CCACHE_DIR=/root/.ccache" >> ~/.bashrc
+	./prebuilt/linux-x86/ccache/ccache -M 20G
+fi
+echo "Cloning test device tree..."
+cd device
+mkdir mlx
+cd mlx
+git clone https://github.com/MLXProjects/android_device_mlx_test mlx_test --depth=1
+cd ~
