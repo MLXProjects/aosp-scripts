@@ -55,7 +55,7 @@ done
 cat > "$TARGET_PATH/froyo/root/setup.sh" <<EOF
 #!/bin/sh
 # set dns
-nameserver 8.8.8.8 > /etc/resolv.conf
+echo nameserver 8.8.8.8 > /etc/resolv.conf
 # get keys & sync repos
 apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 16126D3A3E5C1192 7F0BB3BE5BF00518 C2518248EEA14886 464AD83D4631BBEA 089EBE08314DF160 B9316A7BC7917B12 EB9B1D8886F44E2A
 apt-get update
@@ -142,7 +142,7 @@ done
 cat > "$TARGET_PATH/gb/root/setup.sh" <<EOF
 #!/bin/sh
 # set dns
-nameserver 8.8.8.8 > /etc/resolv.conf
+echo nameserver 8.8.8.8 > /etc/resolv.conf
 # get keys & sync repos
 apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 16126D3A3E5C1192 7F0BB3BE5BF00518 C2518248EEA14886 464AD83D4631BBEA 089EBE08314DF160 B9316A7BC7917B12 EB9B1D8886F44E2A
 apt-get update
@@ -225,7 +225,7 @@ done
 cat > "$TARGET_PATH/lp/root/setup.sh" <<EOF
 #!/bin/sh
 # set dns
-nameserver 8.8.8.8 > /etc/resolv.conf
+echo nameserver 8.8.8.8 > /etc/resolv.conf
 # get keys & sync repos
 apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 16126D3A3E5C1192
 apt-get update
