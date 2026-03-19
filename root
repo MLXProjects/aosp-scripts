@@ -1,6 +1,11 @@
+#!/bin/sh
 if [ -z "$1" ]; then
 	printf "Usage: $0 TARGET\n\tTARGET\tchroot directory\n"
 	exit
+fi
+
+if [ "$(id -u)" != "0" ]; then
+        exec sudo "$0" "$@"
 fi
 
 TARGET=$(dirname "$(readlink -f "$0")")/$1

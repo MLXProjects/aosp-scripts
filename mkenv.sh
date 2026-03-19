@@ -1,5 +1,5 @@
 #!/bin/sh
-TARGET_PATH="$(realpath .)"
+TARGET_PATH="$(readlink -f .)"
 
 # install host dependencies
 # Alpine: (needs community repo)
@@ -54,15 +54,17 @@ done
 # use setup script inside chroot
 cat > "$TARGET_PATH/froyo/root/setup.sh" <<EOF
 #!/bin/sh
+# set generic locale
+echo "export LC_ALL=C" >> /etc/environment
 # set dns
 echo nameserver 8.8.8.8 > /etc/resolv.conf
 # get keys & sync repos
 apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 16126D3A3E5C1192 7F0BB3BE5BF00518 C2518248EEA14886 464AD83D4631BBEA 089EBE08314DF160 B9316A7BC7917B12 EB9B1D8886F44E2A
 apt-get update
 # install AOSP dependencies
-apt-get install -y git-core gnupg flex bison gperf build-essential \
-  zip curl zlib1g-dev libc6-dev libncurses5-dev x11proto-core-dev \
-  libx11-dev libreadline6-dev libgl1-mesa-dev tofrodos python-markdown \
+apt-get install -y git-core gnupg flex bison gperf build-essential \\
+  zip curl zlib1g-dev libc6-dev libncurses5-dev x11proto-core-dev \\
+  libx11-dev libreadline6-dev libgl1-mesa-dev tofrodos python-markdown \\
   libxml2-utils nano wget unixodbc
 # install JDK
 cd /root
@@ -141,6 +143,8 @@ done
 # use setup script inside chroot
 cat > "$TARGET_PATH/gb/root/setup.sh" <<EOF
 #!/bin/sh
+# set generic locale
+echo "export LC_ALL=C" >> /etc/environment
 # set dns
 echo nameserver 8.8.8.8 > /etc/resolv.conf
 # get keys & sync repos
@@ -150,10 +154,10 @@ apt-get update
 # install multiarch dependencies
 apt-get install -y gcc-multilib g++-multilib
 # install AOSP dependencies
-apt-get install -y git-core gnupg flex bison gperf build-essential \
-  zip curl zlib1g-dev libc6-dev libncurses5-dev:i386 ia32-libs \
-  x11proto-core-dev libx11-dev:i386 libreadline6-dev:i386 libgl1-mesa-glx:i386 \
-  libgl1-mesa-dev g++-multilib mingw32 tofrodos python-markdown \
+apt-get install -y git-core gnupg flex bison gperf build-essential \\
+  zip curl zlib1g-dev libc6-dev libncurses5-dev:i386 ia32-libs \\
+  x11proto-core-dev libx11-dev:i386 libreadline6-dev:i386 libgl1-mesa-glx:i386 \\
+  libgl1-mesa-dev g++-multilib mingw32 tofrodos python-markdown \\
   libxml2-utils xsltproc zlib1g-dev:i386 g++-multilib nano wget unixodbc
 #### echo -n "Press any key to continue . . . " && read && echo
 # install JDK
@@ -224,6 +228,8 @@ done
 # use setup script inside chroot
 cat > "$TARGET_PATH/lp/root/setup.sh" <<EOF
 #!/bin/sh
+# set generic locale
+echo "export LC_ALL=C" >> /etc/environment
 # set dns
 echo nameserver 8.8.8.8 > /etc/resolv.conf
 # get keys & sync repos
@@ -232,10 +238,10 @@ apt-get update
 # install multiarch dependencies
 apt install -y gcc-multilib g++-multilib
 # install AOSP dependencies
-apt install -y git-core gnupg flex bison gperf build-essential \
-  zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 \
-  lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z-dev ccache \
-  libgl1-mesa-dev libxml2-utils xsltproc unzip openjdk-7-jdk nano wget || exit
+apt install -y git-core gnupg flex bison gperf build-essential \\
+  zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 \\
+  lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z-dev ccache \\
+  libgl1-mesa-dev libxml2-utils xsltproc unzip openjdk-7-jdk python nano wget || exit
 # set aliases
 alias cls=clear >> /root/.bash_aliases
 # set dummy git account
@@ -260,18 +266,22 @@ done
 #
 cat > "$TARGET_PATH/root" <<EOF
 #!/bin/sh
-if [ -z "$1" ]; then
-	printf "Usage: $0 TARGET\n\tTARGET\tchroot directory\n"
+if [ -z "\$1" ]; then
+	printf "Usage: \$0 TARGET\\n\\tTARGET\\tchroot directory\\n"
 	exit
 fi
 
-TARGET=$(dirname "$(realpath -f "$0")")/$1
+if [ "\$(id -u)" -ne 0 ]; then
+        exec sudo "\$0" "\$@"
+fi
+
+TARGET=\$(dirname "\$(readlink -f "\$0")")/\$1
 for f in dev dev/pts proc sys; do
-	mount --bind /$f $TARGET/$f
+	mount --bind /\$f \$TARGET/\$f
 done
-chroot $TARGET /bin/login -f root
+chroot \$TARGET /bin/login -f root
 for f in dev/pts dev proc sys; do
-	umount $TARGET/$f
+	umount \$TARGET/\$f
 done
 EOF
 chmod a+x "$TARGET_PATH/root"
